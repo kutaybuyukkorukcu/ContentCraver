@@ -3,9 +3,13 @@ package com.scalx.contentcraver.utils;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.List;
 
+@ApplicationScoped
+@Named
 public class Context {
 
     private Strategy strategy;

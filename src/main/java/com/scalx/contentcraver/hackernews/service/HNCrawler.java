@@ -9,8 +9,10 @@ import com.scalx.contentcraver.BaseComment;
 
 import com.scalx.contentcraver.hackernews.entity.HNCard;
 import com.scalx.contentcraver.utils.Strategy;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -23,7 +25,8 @@ import java.util.List;
 @ApplicationScoped
 public class HNCrawler implements Strategy {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Inject
+    private ObjectMapper objectMapper;
 
     private static int sizeOfComments = 0;
 

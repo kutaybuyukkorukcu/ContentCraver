@@ -11,15 +11,21 @@ import com.scalx.contentcraver.utils.Strategy;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.util.*;
 
+@Named
+@ApplicationScoped
 public class RDTCrawler implements Strategy {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Inject
+    private ObjectMapper objectMapper;
 
     private static int sizeOfComments = 0;
 
