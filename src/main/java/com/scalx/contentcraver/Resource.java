@@ -15,7 +15,7 @@ import java.util.List;
 
 @Path("/api")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.TEXT_PLAIN)
 public class Resource {
 
     @Inject
@@ -27,17 +27,18 @@ public class Resource {
     @Inject
     Context context;
 
-    @GET
-    @Path("/articles/{topic}")
-    public Response getArticles(@QueryParam("content") String content, @PathParam("topic") String topic)
+    // Convert To Post
+    @POST
+    @Path("/articles")
+    public Response getArticles(@QueryParam("content") String content, String topic)
             throws IOException {
 
         if (ContentType.REDDIT.getContentType().equals(content.toUpperCase())) {
-            context.setStrategy(new RDTCrawler());
+            context.setCrawlerStrategy(new RDTCrawler());
         }
 
         if (ContentType.HACKERNEWS.getContentType().equals(content.toUpperCase())) {
-            context.setStrategy(new HNCrawler());
+            context.setCrawlerStrategy(new HNCrawler());
         }
 
         List<BaseCard> articles =  context.getArticleLinks(topic);
@@ -45,17 +46,19 @@ public class Resource {
         return Response.ok(articles).build();
     }
 
-    @GET
-    @Path("/comments/{link}")
-    public Response getComments(@QueryParam("content") String content, @PathParam("link") String link)
+
+    // Convert To Post
+    @POST
+    @Path("/comments")
+    public Response getComments(@QueryParam("content") String content, String link)
             throws IOException {
 
         if (ContentType.REDDIT.getContentType().equals(content.toUpperCase())) {
-            context.setStrategy(new RDTCrawler());
+            context.setCrawlerStrategy(new RDTCrawler());
         }
 
         if (ContentType.HACKERNEWS.getContentType().equals(content.toUpperCase())) {
-            context.setStrategy(new HNCrawler());
+            context.setCrawlerStrategy(new HNCrawler());
         }
 
         List<BaseComment> comments =  context.getArticleComments(link);

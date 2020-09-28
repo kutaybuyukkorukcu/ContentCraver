@@ -12,17 +12,17 @@ import java.util.List;
 @Named
 public class Context {
 
-    private Strategy strategy;
+    private CrawlerStrategy crawlerStrategy;
 
-    public void setStrategy(Strategy strategy) {
-        this.strategy = strategy;
+    public void setCrawlerStrategy(CrawlerStrategy crawlerStrategy) {
+        this.crawlerStrategy = crawlerStrategy;
     }
 
     public List<BaseCard> getArticleLinks(String subreddit) throws IOException {
-        return strategy.getArticleLinks(subreddit);
+        return crawlerStrategy.getArticleLinks(subreddit);
     }
 
     public List<BaseComment> getArticleComments(String articleLink) throws IOException {
-        return strategy.getArticleComments(articleLink);
+        return crawlerStrategy.getArticleComments(articleLink);
     }
 }

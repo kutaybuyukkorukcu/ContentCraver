@@ -1,51 +1,44 @@
 package com.scalx.contentcraver.reddit.service;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.scalx.contentcraver.Crawler;
 import com.scalx.contentcraver.hackernews.entity.HNComment;
 import com.scalx.contentcraver.reddit.entity.RDTCard;
-import com.scalx.contentcraver.utils.Strategy;
+import com.scalx.contentcraver.utils.CrawlerStrategy;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.util.*;
 
 @Named
 @ApplicationScoped
-public class RDTCrawler implements Strategy {
+public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
-    @Inject
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static int sizeOfComments = 0;
 
     private static String articleId = "";
 
+    private static final Logger LOG = Logger.getLogger(RDTCrawler.class);
+
     // Main page of an subreddit
     @Override
     public List<BaseCard> getArticleLinks(String articleTopic) throws IOException {
-
-        Client client = ClientBuilder.newClient();
 
         String jsonString = client.target("https://www.reddit.com/r/" + articleTopic + ".json")
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
-//        HttpResponse<kong.unirest.JsonNode> jsonResponse = Unirest
-//                .get("https://www.reddit.com/r/" + articleTopic + ".json")
-//                .asJson();
-//
-//        String jsonString = jsonResponse.getBody().getObject().toString();
+        LOG.info(jsonString);
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -73,39 +66,33 @@ public class RDTCrawler implements Strategy {
             );
         }
 
-        rdtCardList.forEach(System.out::println);
-
         return rdtCardList;
     }
 
     @Override
     public List<BaseComment> getArticleComments(String articleLink) throws IOException {
 
-//        HttpResponse<kong.unirest.JsonNode> jsonResponse = Unirest
-//                .get(articleLink.substring(0, articleLink.length() - 1) + ".json")
-//                .asJson();
+        String jsonString = client
+                .target("https://www.reddit.com" + articleLink.substring(0, articleLink.length() - 1) + ".json")
+                .request(MediaType.APPLICATION_JSON)
+                .get(String.class);
 
-//        LinkedHashMap articleNode = getArticleNode(jsonResponse);
+        LinkedHashMap articleNode = getArticleNode(jsonString);
 
-//        sizeOfComments = getCommentCount(articleNode);
-//
-//        articleId = getArticleId(articleNode);
+        sizeOfComments = getCommentCount(articleNode);
 
-        String jsonString = null;
-//                = jsonResponse.getBody().getArray().get(1).toString();
+        articleId = getArticleId(articleNode);
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
         List<LinkedHashMap<String, LinkedHashMap>> childrenList = objectMapper.convertValue(
-                jsonNode.get("data").get("children"),
+                jsonNode.get(1).get("data").get("children"),
                 TypeFactory.defaultInstance().constructCollectionType(List.class, LinkedHashMap.class)
         );
 
         List<BaseComment> comments = new ArrayList<>();
 
         recursive(childrenList, comments);
-
-        comments.forEach(System.out::println);
 
         sizeOfComments = 0;
 
@@ -161,20 +148,19 @@ public class RDTCrawler implements Strategy {
         }
     }
 
-//    private LinkedHashMap getArticleNode(HttpResponse<kong.unirest.JsonNode> jsonResponse)
-//            throws JsonProcessingException {
-//
-//        String jsonString = jsonResponse.getBody().getArray().get(0).toString();
-//
-//        JsonNode jsonNode = objectMapper.readTree(jsonString);
-//
-//        List<LinkedHashMap<String, LinkedHashMap>> childrenList = objectMapper.convertValue(
-//                jsonNode.get("data").get("children"),
-//                TypeFactory.defaultInstance().constructCollectionType(List.class, LinkedHashMap.class)
-//        );
-//
-//        return childrenList.get(0).get("data");
-//    }
+    private LinkedHashMap getArticleNode(String jsonString) throws JsonProcessingException {
+
+        JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+        LOG.info(jsonNode.get(0).toPrettyString());
+
+        List<LinkedHashMap<String, LinkedHashMap>> childrenList = objectMapper.convertValue(
+                jsonNode.get(0).get("data").get("children"),
+                TypeFactory.defaultInstance().constructCollectionType(List.class, LinkedHashMap.class)
+        );
+
+        return childrenList.get(0).get("data");
+    }
 
     private int getCommentCount(LinkedHashMap articleNode) {
         return Integer.parseInt(articleNode.get("num_comments").toString());

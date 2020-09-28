@@ -7,15 +7,13 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 
+import com.scalx.contentcraver.Crawler;
 import com.scalx.contentcraver.hackernews.entity.HNCard;
-import com.scalx.contentcraver.utils.Strategy;
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import com.scalx.contentcraver.utils.CrawlerStrategy;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,33 +21,26 @@ import java.util.List;
 
 @Named
 @ApplicationScoped
-public class HNCrawler implements Strategy {
+public class HNCrawler extends Crawler implements CrawlerStrategy {
 
-    @Inject
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static int sizeOfComments = 0;
 
     private static String articleId = "";
 
+    private static final Logger LOG = Logger.getLogger(HNCrawler.class);
+
     @Override
     public List<BaseCard> getArticleLinks(String articleTopic) throws IOException {
 
         // the parameter is useless for now, top - new etc. sounds better
-
-
-        Client client = ClientBuilder.newClient();
-
         String jsonString = client
                 .target("https://hacker-news.firebaseio.com/v0/topstories.json")
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
-//        HttpResponse<kong.unirest.JsonNode> jsonResponse = Unirest
-//                .get("https://hacker-news.firebaseio.com/v0/topstories.json")
-//                .asJson();
-
-//        String jsonString = jsonResponse.getBody().toString();
+        LOG.info((jsonString));
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -66,12 +57,6 @@ public class HNCrawler implements Strategy {
                     .target("https://hacker-news.firebaseio.com/v0/item/" + itemNumber.toString() + ".json")
                     .request(MediaType.APPLICATION_JSON)
                     .get(String.class);
-
-//            HttpResponse<kong.unirest.JsonNode> itemResponse = Unirest
-//                    .get("https://hacker-news.firebaseio.com/v0/item/" + itemNumber.toString() + ".json")
-//                    .asJson();
-//
-//            String articleString = itemResponse.getBody().getObject().toString();
 
             JsonNode articleNode = objectMapper.readTree(articleString);
 
@@ -110,23 +95,18 @@ public class HNCrawler implements Strategy {
             );
         }
 
-        articleList.forEach(System.out::println);
-
         return articleList;
     }
 
     @Override
-    public List<BaseComment> getArticleComments(String articleId)
-            throws JsonProcessingException {
+    public List<BaseComment> getArticleComments(String articleLink) throws JsonProcessingException {
 
-//        HttpResponse<kong.unirest.JsonNode> jsonResponse = Unirest
-//                .get("https://hacker-news.firebaseio.com/v0/item/" + articleId + ".json")
-//                .asJson();
+        String jsonString = client
+                .target("https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json")
+                .request(MediaType.APPLICATION_JSON)
+                .get(String.class);
 
         List<BaseComment> comments = new ArrayList<>();
-
-        String jsonString = null;
-//                = jsonResponse.getBody().getObject().toString();
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -141,8 +121,6 @@ public class HNCrawler implements Strategy {
 
         recursive(kidCommentList, comments);
 
-        comments.forEach(System.out::println);
-
         sizeOfComments = 0;
 
         articleId = "";
@@ -155,12 +133,10 @@ public class HNCrawler implements Strategy {
 
         for (Integer kidComment : kidCommentList) {
 
-//            HttpResponse<kong.unirest.JsonNode> jsonResponse = Unirest
-//                    .get("https://hacker-news.firebaseio.com/v0/item/" + kidComment.toString() + ".json")
-//                    .asJson();
-
-            String commentString = null;
-//                    jsonResponse.getBody().getObject().toString();
+            String commentString = client
+                    .target("https://hacker-news.firebaseio.com/v0/item/" + kidComment.toString() + ".json")
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
 
             JsonNode commentNode = objectMapper.readTree(commentString);
 
