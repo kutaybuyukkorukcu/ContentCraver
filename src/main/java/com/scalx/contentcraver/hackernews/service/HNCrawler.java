@@ -14,6 +14,7 @@ import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,11 +35,24 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
     @Override
     public List<BaseCard> getArticleLinks(String articleTopic) throws IOException {
 
-        // the parameter is useless for now, top - new etc. sounds better
-        String jsonString = client
-                .target("https://hacker-news.firebaseio.com/v0/topstories.json")
-                .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
+        String jsonString = "";
+
+        try {
+            jsonString = CLIENT
+                    .target("https://hacker-news.firebaseio.com/v0/" + articleTopic + "stories.json")
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
+        } catch (RuntimeException e) {
+
+            LOG.info(jsonString);
+            LOG.info(e.getClass().toString());
+            throw new NotAuthorizedException(e);
+        }
+
+        // ObjectMapper will throw NullPointer anyway
+        if (jsonString.equals("") || jsonString.equals("null")) {
+            throw new NullPointerException();
+        }
 
         LOG.info((jsonString));
 
@@ -53,10 +67,26 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         for (Integer itemNumber : articleIdList.subList(0, 5)) {
 
-            String articleString = client
-                    .target("https://hacker-news.firebaseio.com/v0/item/" + itemNumber.toString() + ".json")
-                    .request(MediaType.APPLICATION_JSON)
-                    .get(String.class);
+            String articleString = "";
+
+            try {
+
+                articleString = CLIENT
+                        .target("https://hacker-news.firebaseio.com/v0/item/" + itemNumber.toString() + ".json")
+                        .request(MediaType.APPLICATION_JSON)
+                        .get(String.class);
+
+            } catch (RuntimeException e) {
+
+                LOG.info(jsonString);
+                LOG.info(e.getClass().toString());
+                throw new NotAuthorizedException(e);
+            }
+
+            // ObjectMapper will throw NullPointer anyway
+            if (articleString.equals("") || articleString.equals("null")) {
+                throw new NullPointerException();
+            }
 
             JsonNode articleNode = objectMapper.readTree(articleString);
 
@@ -101,10 +131,27 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
     @Override
     public List<BaseComment> getArticleComments(String articleLink) throws JsonProcessingException {
 
-        String jsonString = client
-                .target("https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json")
-                .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
+        String jsonString = "";
+
+        try {
+//            "https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json"
+            jsonString = CLIENT
+                   .target("https://hacker-news.firebaseio.com/v0/item/selam.json")
+                   .request(MediaType.APPLICATION_JSON)
+                   .get(String.class);
+
+            System.out.println("wait what the fck");
+        } catch (RuntimeException e) {
+
+           LOG.info(jsonString);
+           LOG.info(e.getClass().toString());
+           throw new NotAuthorizedException(e);
+        }
+
+        // Instead of returning 404, it returns null as plain text
+        if (jsonString.equals("") || jsonString.equals("null")) {
+            throw new NullPointerException();
+        }
 
         List<BaseComment> comments = new ArrayList<>();
 
@@ -133,10 +180,21 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         for (Integer kidComment : kidCommentList) {
 
-            String commentString = client
-                    .target("https://hacker-news.firebaseio.com/v0/item/" + kidComment.toString() + ".json")
-                    .request(MediaType.APPLICATION_JSON)
-                    .get(String.class);
+            String commentString = "";
+
+            try {
+
+                commentString = CLIENT
+                        .target("https://hacker-news.firebaseio.com/v0/item/" + kidComment.toString() + ".json")
+                        .request(MediaType.APPLICATION_JSON)
+                        .get(String.class);
+
+            } catch (RuntimeException e) {
+
+                LOG.info(commentString);
+                LOG.info(e.getClass().toString());
+                throw new NotAuthorizedException(e);
+            }
 
             JsonNode commentNode = objectMapper.readTree(commentString);
 

@@ -5,15 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.scalx.contentcraver.Crawler;
+import com.scalx.contentcraver.exception.ThrowableRedirectionException;
 import com.scalx.contentcraver.hackernews.entity.HNComment;
 import com.scalx.contentcraver.reddit.entity.RDTCard;
 import com.scalx.contentcraver.utils.CrawlerStrategy;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
+import org.apache.http.client.RedirectException;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.RedirectionException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.util.*;
@@ -34,11 +40,30 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
     @Override
     public List<BaseCard> getArticleLinks(String articleTopic) throws IOException {
 
-        String jsonString = client.target("https://www.reddit.com/r/" + articleTopic + ".json")
-                .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
+        String jsonString = "";
+
+        try {
+
+            jsonString = CLIENT.target("https://www.reddit.com/r/" + articleTopic + ".json")
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
+
+        } catch (RedirectionException e) {
+            LOG.info(jsonString);
+            LOG.info(e.getMessage());
+            throw new ThrowableRedirectionException(e);
+        } catch (NotFoundException e) {
+            LOG.info(jsonString);
+            LOG.info(e.getMessage());
+            throw new NotFoundException(e);
+        }
 
         LOG.info(jsonString);
+
+        // ObjectMapper will throw NullPointer anyway
+        if (jsonString.equals("")) {
+            throw new NullPointerException();
+        }
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -51,18 +76,18 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         for (LinkedHashMap<String, LinkedHashMap> linkedHashMap : childrenList) {
 
-            LinkedHashMap<String, Object> mapim = linkedHashMap.get("data");
+            LinkedHashMap<String, Object> articleMap = linkedHashMap.get("data");
 
             rdtCardList.add(new RDTCard(
-                    mapim.get("name").toString(),
-                    mapim.get("title").toString(),
-                    mapim.get("subreddit").toString(),
-                    mapim.get("url").toString(),
-                    mapim.get("author").toString(),
-                    mapim.get("selftext").toString(),
-                    (int) mapim.get("ups"),
-                    (int) mapim.get("num_comments"),
-                    ((Double) mapim.get("created")).intValue())
+                    articleMap.get("name").toString(),
+                    articleMap.get("title").toString(),
+                    articleMap.get("subreddit").toString(),
+                    articleMap.get("url").toString(),
+                    articleMap.get("author").toString(),
+                    articleMap.get("selftext").toString(),
+                    (int) articleMap.get("ups"),
+                    (int) articleMap.get("num_comments"),
+                    ((Double) articleMap.get("created")).intValue())
             );
         }
 
@@ -72,10 +97,28 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
     @Override
     public List<BaseComment> getArticleComments(String articleLink) throws IOException {
 
-        String jsonString = client
-                .target("https://www.reddit.com" + articleLink.substring(0, articleLink.length() - 1) + ".json")
-                .request(MediaType.APPLICATION_JSON)
-                .get(String.class);
+        String jsonString = "";
+
+        try {
+
+            jsonString = CLIENT.target("https://www.reddit.com" + articleLink + ".json")
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(String.class);
+
+        }  catch (RedirectionException e) {
+            LOG.info(jsonString);
+            LOG.info(e.getMessage());
+            throw new ThrowableRedirectionException(e);
+        } catch (NotFoundException e) {
+            LOG.info(jsonString);
+            LOG.info(e.getMessage());
+            throw new NotFoundException(e);
+        }
+
+        // ObjectMapper will throw NullPointer anyway
+        if (jsonString.equals("")) {
+            throw new NullPointerException();
+        }
 
         LinkedHashMap articleNode = getArticleNode(jsonString);
 
@@ -105,17 +148,17 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         for (LinkedHashMap<String, LinkedHashMap> linkedHashMap : childrenList) {
 
-            LinkedHashMap<String, Object> mapim  =  linkedHashMap.get("data");
+            LinkedHashMap<String, Object> commentMap  =  linkedHashMap.get("data");
 
-            if (mapim.get("replies").equals("")) {
+            if (commentMap.get("replies").equals("")) {
 
                 comments.add(new HNComment(
                         articleId,
-                        mapim.get("name").toString(),
-                        mapim.get("body").toString(),
-                        mapim.get("author").toString(),
-                        mapim.get("parent_id").toString(),
-                        ((Double) mapim.get("created")).intValue())
+                        commentMap.get("name").toString(),
+                        commentMap.get("body").toString(),
+                        commentMap.get("author").toString(),
+                        commentMap.get("parent_id").toString(),
+                        ((Double) commentMap.get("created")).intValue())
                 );
 
                 continue;
@@ -123,11 +166,11 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
             comments.add(new HNComment(
                     articleId,
-                    mapim.get("name").toString(),
-                    mapim.get("body").toString(),
-                    mapim.get("author").toString(),
-                    mapim.get("parent_id").toString(),
-                    ((Double) mapim.get("created")).intValue())
+                    commentMap.get("name").toString(),
+                    commentMap.get("body").toString(),
+                    commentMap.get("author").toString(),
+                    commentMap.get("parent_id").toString(),
+                    ((Double) commentMap.get("created")).intValue())
             );
 
             LinkedHashMap<String, LinkedHashMap> linkedHashMap2 = objectMapper.convertValue(

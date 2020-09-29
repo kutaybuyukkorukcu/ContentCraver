@@ -17,5 +17,4 @@ public class HelloTest {
              .statusCode(200)
              .body(is("hello"));
     }
-
 }

@@ -11,8 +11,9 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class Crawler {
 
-    public final ResteasyClient client = new ResteasyClientBuilderImpl()
-            .connectionPoolSize(20)
+    public final ResteasyClient CLIENT = new ResteasyClientBuilderImpl()
+            .connectionPoolSize(30)
             .connectTimeout(20, TimeUnit.SECONDS)
             .build();
+
 }
