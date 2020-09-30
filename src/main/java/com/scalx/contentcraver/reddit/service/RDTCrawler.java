@@ -60,11 +60,6 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         LOG.info(jsonString);
 
-        // ObjectMapper will throw NullPointer anyway
-        if (jsonString.equals("")) {
-            throw new NullPointerException();
-        }
-
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
         List<LinkedHashMap<String, LinkedHashMap>> childrenList = objectMapper.convertValue(
@@ -113,11 +108,6 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
             LOG.info(jsonString);
             LOG.info(e.getMessage());
             throw new NotFoundException(e);
-        }
-
-        // ObjectMapper will throw NullPointer anyway
-        if (jsonString.equals("")) {
-            throw new NullPointerException();
         }
 
         LinkedHashMap articleNode = getArticleNode(jsonString);

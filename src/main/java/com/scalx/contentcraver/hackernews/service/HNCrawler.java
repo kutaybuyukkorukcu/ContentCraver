@@ -50,7 +50,8 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
         }
 
         // ObjectMapper will throw NullPointer anyway
-        if (jsonString.equals("") || jsonString.equals("null")) {
+        if (jsonString.equals("null")) {
+            // Create a new NullPointerException.
             throw new NullPointerException();
         }
 
@@ -85,7 +86,8 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
             // https://hacker-news.firebaseio.com/v0/item/top.json
             // Instead of returning 404, it returns null as plain text
-            if (articleString.equals("") || articleString.equals("null")) {
+            if (articleString.equals("null")) {
+                // Create a new NullPointerException.
                 throw new NullPointerException();
             }
 
@@ -148,7 +150,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         // https://hacker-news.firebaseio.com/v0/item/top.json
         // Instead of returning 404, it returns null as plain text
-        if (jsonString.equals("") || jsonString.equals("null")) {
+        if (jsonString.equals("null")) {
             throw new NullPointerException();
         }
 
