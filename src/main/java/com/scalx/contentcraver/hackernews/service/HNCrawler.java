@@ -83,7 +83,8 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                 throw new NotAuthorizedException(e);
             }
 
-            // ObjectMapper will throw NullPointer anyway
+            // https://hacker-news.firebaseio.com/v0/item/top.json
+            // Instead of returning 404, it returns null as plain text
             if (articleString.equals("") || articleString.equals("null")) {
                 throw new NullPointerException();
             }
@@ -134,13 +135,10 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
         String jsonString = "";
 
         try {
-//            "https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json"
             jsonString = CLIENT
-                   .target("https://hacker-news.firebaseio.com/v0/item/selam.json")
+                   .target("https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json")
                    .request(MediaType.APPLICATION_JSON)
                    .get(String.class);
-
-            System.out.println("wait what the fck");
         } catch (RuntimeException e) {
 
            LOG.info(jsonString);
@@ -148,6 +146,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
            throw new NotAuthorizedException(e);
         }
 
+        // https://hacker-news.firebaseio.com/v0/item/top.json
         // Instead of returning 404, it returns null as plain text
         if (jsonString.equals("") || jsonString.equals("null")) {
             throw new NullPointerException();
