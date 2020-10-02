@@ -51,11 +51,11 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
             LOG.info(RedirectionException.class.toString());
             LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
-            throw new ThrowableRedirectionException(e);
+            throw new ThrowableRedirectionException("Given subreddit is not active.");
         } catch (NotFoundException e) {
             LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
-            throw new NotFoundException(e);
+            throw new NotFoundException("Given subreddit value is not suitable for the format. Check the parameter.");
         }
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
@@ -105,11 +105,12 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
         }  catch (RedirectionException e) {
             LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
-            throw new ThrowableRedirectionException(e);
+            throw new ThrowableRedirectionException("Given article link value is not suitable for the format. " +
+                    "Check backslashes.");
         } catch (NotFoundException e) {
             LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
-            throw new NotFoundException(e);
+            throw new NotFoundException("Given article link value is not suitable for the format. Check comment id.");
         }
 
         LinkedHashMap articleNode = getArticleNode(jsonString);

@@ -20,7 +20,7 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
     @Override
     public Response toResponse(WebApplicationException exception) {
 
-        if (exception.getClass().toString().equals(NotAuthorizedException.class.toString())) {
+        if (exception.getClass().toString().equals(ThrowableNotAuthorizedException.class.toString())) {
             return Response
                     .status(Response.Status.fromStatusCode(401))
                     .entity(exception.getMessage())
@@ -37,16 +37,15 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
         if (exception.getClass().toString().equals(ThrowableRedirectionException.class.toString())) {
             return Response
                     .status(Response.Status.fromStatusCode(302))
-                    .entity("HTTP 302 Redirect")
+                    .entity(exception.getMessage())
                     .build();
         }
 
         if (exception.getClass().toString().equals(UnexpectedValueException.class.toString())) {
 
-            LOG.info(exception.getMessage());
             return Response
                     .status(Response.Status.fromStatusCode(400))
-                    .entity("HTTP 400 Bad Request")
+                    .entity(exception.getMessage())
                     .build();
         }
 

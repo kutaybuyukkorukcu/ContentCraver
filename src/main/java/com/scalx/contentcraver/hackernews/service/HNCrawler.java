@@ -9,6 +9,7 @@ import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 
 import com.scalx.contentcraver.Crawler;
+import com.scalx.contentcraver.exception.ThrowableNotAuthorizedException;
 import com.scalx.contentcraver.exception.ThrowableRedirectionException;
 import com.scalx.contentcraver.exception.UnexpectedValueException;
 import com.scalx.contentcraver.hackernews.entity.HNCard;
@@ -22,6 +23,7 @@ import javax.inject.Named;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +51,13 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                     .request(MediaType.APPLICATION_JSON)
                     .get(String.class);
         } catch (NotAuthorizedException e) {
-            LOG.info(e.getClass().toString());
-            throw new NotAuthorizedException("Expected top or new as parameter.");
+            throw new ThrowableNotAuthorizedException("Expected top or new as parameter");
         }  catch (RuntimeException e) {
-            LOG.info(e.getClass().toString());
+            LOG.info("Unexpected RuntimeException thrown");
+            LOG.info("Class name : " + e.getClass().toString());
+            LOG.info("Exception message : " + e.getMessage());
+            LOG.info("Exception cause : " + e.getCause());
+            LOG.info("Exception localized message : " + e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
 
@@ -77,14 +82,17 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                         .get(String.class);
 
             } catch (RuntimeException e) {
-                LOG.info(e.getClass().toString());
+                LOG.info("Unexpected RuntimeException thrown");
+                LOG.info("Class name : " + e.getClass().toString());
+                LOG.info("Exception message : " + e.getMessage());
+                LOG.info("Exception cause : " + e.getCause());
+                LOG.info("Exception localized message : " + e.getLocalizedMessage());
                 throw new RuntimeException(e);
             }
 
             // https://hacker-news.firebaseio.com/v0/item/top.json
             // Instead of returning 404, it returns null as plain text
             if (articleString.equals("null")) {
-                // Create a new NullPointerException.
                 throw new UnexpectedValueException("Given parameter is a string instead of a number");
             }
 
@@ -139,8 +147,12 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                    .request(MediaType.APPLICATION_JSON)
                    .get(String.class);
         } catch (RuntimeException e) {
-           LOG.info(e.getClass().toString());
-           throw new RuntimeException();
+            LOG.info("Unexpected RuntimeException thrown");
+            LOG.info("Class name : " + e.getClass().toString());
+            LOG.info("Exception message : " + e.getMessage());
+            LOG.info("Exception cause : " + e.getCause());
+            LOG.info("Exception localized message : " + e.getLocalizedMessage());
+           throw new RuntimeException(e);
         }
 
         // https://hacker-news.firebaseio.com/v0/item/top.json
@@ -155,7 +167,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         // https://hacker-news.firebaseio.com/v0/item/24576346.json
         // The articleLink parameter is a combination of numbers but it's an id of a comment
-        if (jsonNode.get("type").equals("comment")) {
+        if (!jsonNode.get("type").asText().equals("story")) {
             throw new UnexpectedValueException("Given parameter is an id of a comment");
         }
 
@@ -192,8 +204,12 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                         .get(String.class);
 
             } catch (RuntimeException e) {
-                LOG.info(e.getClass().toString());
-                throw new NotAuthorizedException(e);
+                LOG.info("Unexpected RuntimeException thrown");
+                LOG.info("Class name : " + e.getClass().toString());
+                LOG.info("Exception message : " + e.getMessage());
+                LOG.info("Exception cause : " + e.getCause());
+                LOG.info("Exception localized message : " + e.getLocalizedMessage());
+                throw new RuntimeException(e);
             }
 
             JsonNode commentNode = objectMapper.readTree(commentString);

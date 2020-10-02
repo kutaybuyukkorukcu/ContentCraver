@@ -47,7 +47,7 @@ public class RDTCrawlerTest {
             .then()
                 .statusCode(302)
                 .and()
-                .body(is("HTTP 302 Redirect"));
+                .body(is("Given subreddit is not active."));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class RDTCrawlerTest {
             .then()
                 .statusCode(404)
                 .and()
-                .body(is("HTTP 404 Not Found"));
+                .body(is("Given subreddit value is not suitable for the format. Check the parameter."));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class RDTCrawlerTest {
             .then()
                 .statusCode(302)
                 .and()
-                .body(is("HTTP 302 Redirect"));
+                .body(is("Given article link value is not suitable for the format. Check backslashes."));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class RDTCrawlerTest {
             .then()
                 .statusCode(404)
                 .and()
-                .body(is("HTTP 404 Not Found"));
+                .body(is("Given article link value is not suitable for the format. Check comment id."));
     }
 
     @Test

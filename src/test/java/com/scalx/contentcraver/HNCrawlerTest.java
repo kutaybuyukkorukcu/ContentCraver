@@ -39,7 +39,7 @@ public class HNCrawlerTest {
             .then()
                 .statusCode(401)
                 .and()
-                .body(is("HTTP 401 Unauthorized"));
+                .body(is("Expected top or new as parameter"));
     }
 
     @Test
@@ -76,18 +76,33 @@ public class HNCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint_throwsUnexpectedValueException() throws Exception {
+    public void test_getArticleCommentsEndpoint_throwsUnexpectedValueException_1() throws Exception {
 
         given()
             .when()
                 .contentType(ContentType.TEXT)
-                .body("mockdata")
+                .body("Given parameter is a string instead of a number")
                 .queryParam("content", "hackernews")
                 .post("/api/comments")
             .then()
                 .statusCode(400)
                 .and()
-                .body(is("HTTP 400 Bad Request"));
+                .body(is("Given parameter is a string instead of a number"));
+    }
+
+    @Test
+    public void test_getArticleCommentsEndpoint_throwsUnexpectedValueException_2() throws Exception {
+
+        given()
+                .when()
+                .contentType(ContentType.TEXT)
+                .body("24576346")
+                .queryParam("content", "hackernews")
+                .post("/api/comments")
+                .then()
+                .statusCode(400)
+                .and()
+                .body(is("Given parameter is an id of a comment"));
     }
 
     @Test
@@ -98,7 +113,7 @@ public class HNCrawlerTest {
         Response response = given()
                 .when()
                     .contentType(ContentType.TEXT)
-                    .body("24576561")
+                    .body("24576266")
                     .queryParam("content", "hackernews")
                     .post("/api/comments")
                 .thenReturn();
