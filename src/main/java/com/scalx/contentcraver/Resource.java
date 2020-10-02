@@ -1,22 +1,29 @@
 package com.scalx.contentcraver;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scalx.contentcraver.hackernews.service.HNCrawler;
 import com.scalx.contentcraver.reddit.service.RDTCrawler;
 import com.scalx.contentcraver.utils.ContentType;
-import com.scalx.contentcraver.utils.Context;
+import com.scalx.contentcraver.helper.Context;
+import com.scalx.contentcraver.utils.StandardResponse;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Path("/api")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.TEXT_PLAIN)
 public class Resource {
+
+    @Inject
+    ObjectMapper objectMapper;
 
     @Inject
     HNCrawler hnCrawler;
@@ -43,7 +50,14 @@ public class Resource {
 
         List<BaseCard> articles =  context.getArticleLinks(topic);
 
-        return Response.ok(articles).build();
+        return Response.ok(
+                new StandardResponse(
+                    Response.Status.OK.getStatusCode(),
+                    Response.Status.OK.getReasonPhrase(),
+                    (int) LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
+                    objectMapper.convertValue(articles, JsonNode.class)
+                )
+        ).build();
     }
 
 
@@ -63,7 +77,14 @@ public class Resource {
 
         List<BaseComment> comments =  context.getArticleComments(link);
 
-        return Response.ok(comments).build();
+        return Response.ok(
+                new StandardResponse(
+                        Response.Status.OK.getStatusCode(),
+                        Response.Status.OK.getReasonPhrase(),
+                        (int) LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
+                        objectMapper.convertValue(comments, JsonNode.class)
+                )
+        ).build();
     }
 
     // get articles with comments

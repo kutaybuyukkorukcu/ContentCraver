@@ -8,8 +8,11 @@ import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 
 import com.scalx.contentcraver.Crawler;
+import com.scalx.contentcraver.exception.UnexpectedValueException;
 import com.scalx.contentcraver.hackernews.entity.HNCard;
-import com.scalx.contentcraver.utils.CrawlerStrategy;
+import com.scalx.contentcraver.hackernews.entity.HNComment;
+import com.scalx.contentcraver.helper.CrawlerStrategy;
+import com.scalx.contentcraver.reddit.entity.RDTCard;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -44,15 +47,9 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                     .get(String.class);
         } catch (RuntimeException e) {
 
-            LOG.info(jsonString);
+            LOG.info(e.getClass().toString());
             LOG.info(e.getClass().toString());
             throw new NotAuthorizedException(e);
-        }
-
-        // ObjectMapper will throw NullPointer anyway
-        if (jsonString.equals("null")) {
-            // Create a new NullPointerException.
-            throw new NullPointerException();
         }
 
         LOG.info((jsonString));
@@ -66,7 +63,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         List<BaseCard> articleList = new ArrayList<>();
 
-        for (Integer itemNumber : articleIdList.subList(0, 5)) {
+        for (Integer itemNumber : articleIdList.subList(0, 25)) {
 
             String articleString = "";
 
@@ -79,7 +76,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
             } catch (RuntimeException e) {
 
-                LOG.info(jsonString);
+                LOG.info(e.getClass().toString());
                 LOG.info(e.getClass().toString());
                 throw new NotAuthorizedException(e);
             }
@@ -141,9 +138,9 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                    .target("https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json")
                    .request(MediaType.APPLICATION_JSON)
                    .get(String.class);
-        } catch (RuntimeException e) {
+        } catch (NotAuthorizedException e) {
 
-           LOG.info(jsonString);
+           LOG.info(e.getClass().toString());
            LOG.info(e.getClass().toString());
            throw new NotAuthorizedException(e);
         }
@@ -151,7 +148,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
         // https://hacker-news.firebaseio.com/v0/item/top.json
         // Instead of returning 404, it returns null as plain text
         if (jsonString.equals("null")) {
-            throw new NullPointerException();
+            throw new UnexpectedValueException();
         }
 
         List<BaseComment> comments = new ArrayList<>();
@@ -191,8 +188,6 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                         .get(String.class);
 
             } catch (RuntimeException e) {
-
-                LOG.info(commentString);
                 LOG.info(e.getClass().toString());
                 throw new NotAuthorizedException(e);
             }
@@ -217,7 +212,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
             if (isKidCommentAvailable) {
 
-                comments.add(new BaseComment(
+                comments.add(new HNComment(
                         articleId,
                         commentNode.get("id").asText(),
                         commentNode.get("text").asText(),
@@ -229,7 +224,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                 continue;
             }
 
-            comments.add(new BaseComment(
+            comments.add(new HNComment(
                     articleId,
                     commentNode.get("id").asText(),
                     commentNode.get("text").asText(),

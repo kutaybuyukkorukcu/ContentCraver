@@ -8,18 +8,16 @@ import com.scalx.contentcraver.Crawler;
 import com.scalx.contentcraver.exception.ThrowableRedirectionException;
 import com.scalx.contentcraver.hackernews.entity.HNComment;
 import com.scalx.contentcraver.reddit.entity.RDTCard;
-import com.scalx.contentcraver.utils.CrawlerStrategy;
+import com.scalx.contentcraver.helper.CrawlerStrategy;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
-import org.apache.http.client.RedirectException;
+import com.scalx.contentcraver.reddit.entity.RDTComment;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.RedirectionException;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.util.*;
@@ -46,19 +44,19 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
             jsonString = CLIENT.target("https://www.reddit.com/r/" + articleTopic + ".json")
                     .request(MediaType.APPLICATION_JSON)
+                    .header("User-agent", "Devnews")
                     .get(String.class);
 
         } catch (RedirectionException e) {
-            LOG.info(jsonString);
+            LOG.info(RedirectionException.class.toString());
+            LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
             throw new ThrowableRedirectionException(e);
         } catch (NotFoundException e) {
-            LOG.info(jsonString);
+            LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
             throw new NotFoundException(e);
         }
-
-        LOG.info(jsonString);
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -92,20 +90,24 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
     @Override
     public List<BaseComment> getArticleComments(String articleLink) throws IOException {
 
+        // Processing exception might be throwwn cause of the articleLink.
+        // It's probably best to create pattern for articleLink (regx)
+
         String jsonString = "";
 
         try {
 
-            jsonString = CLIENT.target("https://www.reddit.com" + articleLink + ".json")
+            jsonString = CLIENT.target("https://www.reddit.com/r/" + articleLink + ".json")
                     .request(MediaType.APPLICATION_JSON)
+                    .header("User-agent", "Devnews")
                     .get(String.class);
 
         }  catch (RedirectionException e) {
-            LOG.info(jsonString);
+            LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
             throw new ThrowableRedirectionException(e);
         } catch (NotFoundException e) {
-            LOG.info(jsonString);
+            LOG.info(e.getClass().toString());
             LOG.info(e.getMessage());
             throw new NotFoundException(e);
         }
@@ -142,7 +144,7 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
             if (commentMap.get("replies").equals("")) {
 
-                comments.add(new HNComment(
+                comments.add(new RDTComment(
                         articleId,
                         commentMap.get("name").toString(),
                         commentMap.get("body").toString(),
@@ -154,7 +156,7 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
                 continue;
             }
 
-            comments.add(new HNComment(
+            comments.add(new RDTComment(
                     articleId,
                     commentMap.get("name").toString(),
                     commentMap.get("body").toString(),

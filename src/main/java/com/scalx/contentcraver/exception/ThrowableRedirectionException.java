@@ -1,6 +1,9 @@
 package com.scalx.contentcraver.exception;
 
-public class ThrowableRedirectionException extends RuntimeException {
+import javax.ws.rs.RedirectionException;
+import javax.ws.rs.WebApplicationException;
+
+public class ThrowableRedirectionException extends WebApplicationException {
 
     private static final long serialVersionUID = 1L;
 

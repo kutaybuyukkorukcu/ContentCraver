@@ -1,4 +1,4 @@
-package com.scalx.contentcraver.utils;
+package com.scalx.contentcraver.helper;
 
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
