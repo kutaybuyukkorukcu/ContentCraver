@@ -140,7 +140,13 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         for (LinkedHashMap<String, LinkedHashMap> linkedHashMap : childrenList) {
 
+//             Checking for "Continue this thread"
+            if (String.valueOf(linkedHashMap.get("kind")).equals("more")) {
+                continue;
+            }
+
             LinkedHashMap<String, Object> commentMap  =  linkedHashMap.get("data");
+
 
             if (commentMap.get("replies").equals("")) {
 

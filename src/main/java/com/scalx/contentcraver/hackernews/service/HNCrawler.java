@@ -3,11 +3,13 @@ package com.scalx.contentcraver.hackernews.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 
 import com.scalx.contentcraver.Crawler;
+import com.scalx.contentcraver.exception.ThrowableRedirectionException;
 import com.scalx.contentcraver.exception.UnexpectedValueException;
 import com.scalx.contentcraver.hackernews.entity.HNCard;
 import com.scalx.contentcraver.hackernews.entity.HNComment;
@@ -18,6 +20,7 @@ import org.jboss.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,14 +48,13 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                     .target("https://hacker-news.firebaseio.com/v0/" + articleTopic + "stories.json")
                     .request(MediaType.APPLICATION_JSON)
                     .get(String.class);
-        } catch (RuntimeException e) {
-
+        } catch (NotAuthorizedException e) {
             LOG.info(e.getClass().toString());
+            throw new NotAuthorizedException("Expected top or new as parameter.");
+        }  catch (RuntimeException e) {
             LOG.info(e.getClass().toString());
-            throw new NotAuthorizedException(e);
+            throw new RuntimeException(e);
         }
-
-        LOG.info((jsonString));
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -75,17 +77,15 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                         .get(String.class);
 
             } catch (RuntimeException e) {
-
                 LOG.info(e.getClass().toString());
-                LOG.info(e.getClass().toString());
-                throw new NotAuthorizedException(e);
+                throw new RuntimeException(e);
             }
 
             // https://hacker-news.firebaseio.com/v0/item/top.json
             // Instead of returning 404, it returns null as plain text
             if (articleString.equals("null")) {
                 // Create a new NullPointerException.
-                throw new NullPointerException();
+                throw new UnexpectedValueException("Given parameter is a string instead of a number");
             }
 
             JsonNode articleNode = objectMapper.readTree(articleString);
@@ -138,22 +138,26 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                    .target("https://hacker-news.firebaseio.com/v0/item/" + articleLink + ".json")
                    .request(MediaType.APPLICATION_JSON)
                    .get(String.class);
-        } catch (NotAuthorizedException e) {
-
+        } catch (RuntimeException e) {
            LOG.info(e.getClass().toString());
-           LOG.info(e.getClass().toString());
-           throw new NotAuthorizedException(e);
+           throw new RuntimeException();
         }
 
         // https://hacker-news.firebaseio.com/v0/item/top.json
         // Instead of returning 404, it returns null as plain text
         if (jsonString.equals("null")) {
-            throw new UnexpectedValueException();
+            throw new UnexpectedValueException("Given parameter is a string instead of a number");
         }
 
         List<BaseComment> comments = new ArrayList<>();
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+        // https://hacker-news.firebaseio.com/v0/item/24576346.json
+        // The articleLink parameter is a combination of numbers but it's an id of a comment
+        if (jsonNode.get("type").equals("comment")) {
+            throw new UnexpectedValueException("Given parameter is an id of a comment");
+        }
 
         sizeOfComments = getCommentCount(jsonNode);
 

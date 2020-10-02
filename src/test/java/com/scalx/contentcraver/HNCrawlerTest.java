@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
+@QuarkusTest
 public class HNCrawlerTest {
 
     @Inject
@@ -48,9 +51,11 @@ public class HNCrawlerTest {
                 .when()
                     .contentType(ContentType.TEXT)
                     .body("top")
-                    .queryParam("content", "reddit")
+                    .queryParam("content", "hackernews")
                     .post("/api/articles")
                 .thenReturn();
+
+        JsonPath jsonPath = response.jsonPath();
 
         assertThat(response.jsonPath().getInt("statusCode")).isEqualTo(200);
         assertThat(response.jsonPath().getString("message")).isEqualTo("OK");
@@ -93,7 +98,7 @@ public class HNCrawlerTest {
         Response response = given()
                 .when()
                     .contentType(ContentType.TEXT)
-                    .body("mockdata")
+                    .body("24576561")
                     .queryParam("content", "hackernews")
                     .post("/api/comments")
                 .thenReturn();

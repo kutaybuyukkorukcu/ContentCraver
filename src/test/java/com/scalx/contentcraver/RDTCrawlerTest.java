@@ -47,7 +47,7 @@ public class RDTCrawlerTest {
             .then()
                 .statusCode(302)
                 .and()
-                .body(is("HTTP 302 Found"));
+                .body(is("HTTP 302 Redirect"));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class RDTCrawlerTest {
             .then()
                 .statusCode(302)
                 .and()
-                .body(is("HTTP 302 Found"));
+                .body(is("HTTP 302 Redirect"));
     }
 
     @Test

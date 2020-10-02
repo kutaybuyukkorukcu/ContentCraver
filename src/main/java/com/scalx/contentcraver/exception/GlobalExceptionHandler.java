@@ -1,5 +1,8 @@
 package com.scalx.contentcraver.exception;
 
+import com.scalx.contentcraver.hackernews.service.HNCrawler;
+import org.jboss.logging.Logger;
+
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.RedirectionException;
@@ -11,6 +14,8 @@ import java.io.IOException;
 
 @Provider
 public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationException> {
+
+    private static final Logger LOG = Logger.getLogger(GlobalExceptionHandler.class);
 
     @Override
     public Response toResponse(WebApplicationException exception) {
@@ -37,9 +42,11 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
         }
 
         if (exception.getClass().toString().equals(UnexpectedValueException.class.toString())) {
+
+            LOG.info(exception.getMessage());
             return Response
                     .status(Response.Status.fromStatusCode(400))
-                    .entity(exception.getMessage())
+                    .entity("HTTP 400 Bad Request")
                     .build();
         }
 

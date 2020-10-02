@@ -6,7 +6,7 @@ import javax.ws.rs.WebApplicationException;
 
 public class UnexpectedValueException extends WebApplicationException {
 
-    private static final long serialVersionUID = 421L;
+    private static final long serialVersionUID = 40L;
 
     public UnexpectedValueException() {
         super();
