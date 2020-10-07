@@ -55,15 +55,13 @@ public class HNCrawlerTest {
                     .post("/api/articles")
                 .thenReturn();
 
-        JsonPath jsonPath = response.jsonPath();
-
         assertThat(response.jsonPath().getInt("statusCode")).isEqualTo(200);
         assertThat(response.jsonPath().getString("message")).isEqualTo("OK");
 
         List<LinkedHashMap> list = response.jsonPath().getList("data");
         JsonNode jsonNode = objectMapper.convertValue(list.get(0), JsonNode.class);
 
-        assertThat(list.size()).isEqualTo(25);
+        assertThat(list.size()).isEqualTo(24);
         assertThat(jsonNode.get("article_id")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("title")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("main_topic")).isInstanceOf(TextNode.class);

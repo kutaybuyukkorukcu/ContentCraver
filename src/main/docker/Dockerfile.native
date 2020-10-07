@@ -21,7 +21,9 @@ RUN chown 1001 /work \
     && chown 1001:root /work
 COPY --chown=1001:root target/*-runner /work/application
 
+ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0"
+
 EXPOSE 8080
 USER 1001
 
-CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
+#CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]

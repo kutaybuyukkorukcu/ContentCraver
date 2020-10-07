@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Named
 @ApplicationScoped
@@ -70,7 +71,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         List<BaseCard> articleList = new ArrayList<>();
 
-        for (Integer itemNumber : articleIdList.subList(0, 25)) {
+        for (Integer itemNumber : articleIdList.stream().limit(25).collect(Collectors.toList())) {
 
             String articleString = "";
 

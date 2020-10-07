@@ -88,4 +88,10 @@ public class Resource {
     }
 
     // get articles with comments
+    @GET
+    @Path("/yo")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String hello() {
+        return "hello";
+    }
 }
