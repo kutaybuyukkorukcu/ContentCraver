@@ -34,10 +34,9 @@ public class Resource {
     @Inject
     Context context;
 
-    // Convert To Post
     @POST
     @Path("/articles")
-    public Response getArticles(@QueryParam("content") String content, String topic)
+    public Response getArticles(@QueryParam("content") String content, BaseRequest request)
             throws IOException {
 
         if (ContentType.REDDIT.getContentType().equals(content.toUpperCase())) {
@@ -48,7 +47,7 @@ public class Resource {
             context.setCrawlerStrategy(new HNCrawler());
         }
 
-        List<BaseCard> articles =  context.getArticleLinks(topic);
+        List<BaseCard> articles =  context.getArticleLinks(request.getTopic());
 
         return Response.ok(
                 new StandardResponse(
@@ -60,11 +59,9 @@ public class Resource {
         ).build();
     }
 
-
-    // Convert To Post
     @POST
     @Path("/comments")
-    public Response getComments(@QueryParam("content") String content, String link)
+    public Response getComments(@QueryParam("content") String content, BaseRequest request)
             throws IOException {
 
         if (ContentType.REDDIT.getContentType().equals(content.toUpperCase())) {
@@ -75,7 +72,7 @@ public class Resource {
             context.setCrawlerStrategy(new HNCrawler());
         }
 
-        List<BaseComment> comments =  context.getArticleComments(link);
+        List<BaseComment> comments =  context.getArticleComments(request.getLink());
 
         return Response.ok(
                 new StandardResponse(
@@ -87,11 +84,33 @@ public class Resource {
         ).build();
     }
 
-    // get articles with comments
-    @GET
-    @Path("/yo")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
-        return "hello";
-    }
+//    @POST
+//    @Path("/articles")
+//    public Response getArticleWithComments(@QueryParam("content") String content,
+//                                @QueryParam("withComments") boolean isWithComment,
+//                                BaseRequest request) throws IOException {
+//
+//        if (ContentType.REDDIT.getContentType().equals(content.toUpperCase())) {
+//            context.setCrawlerStrategy(new RDTCrawler());
+//        }
+//
+//        if (ContentType.HACKERNEWS.getContentType().equals(content.toUpperCase())) {
+//            context.setCrawlerStrategy(new HNCrawler());
+//        }
+//
+//        if (isWithComment) {
+//
+//        }
+//
+//        List<BaseComment> comments =  context.getArticleComments(request.getLink());
+//
+//        return Response.ok(
+//                new StandardResponse(
+//                        Response.Status.OK.getStatusCode(),
+//                        Response.Status.OK.getReasonPhrase(),
+//                        (int) LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
+//                        objectMapper.convertValue(comments, JsonNode.class)
+//                )
+//        ).build();
+//    }
 }
