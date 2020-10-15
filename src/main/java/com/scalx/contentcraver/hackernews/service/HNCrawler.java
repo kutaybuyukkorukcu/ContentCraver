@@ -153,7 +153,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
             LOG.info("Exception message : " + e.getMessage());
             LOG.info("Exception cause : " + e.getCause());
             LOG.info("Exception localized message : " + e.getLocalizedMessage());
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
         // https://hacker-news.firebaseio.com/v0/item/top.json

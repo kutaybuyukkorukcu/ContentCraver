@@ -19,7 +19,7 @@ import java.util.List;
 
 @Path("/api")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.TEXT_PLAIN)
+@Consumes(MediaType.APPLICATION_JSON)
 public class Resource {
 
     @Inject

@@ -1,7 +1,11 @@
 package com.scalx.contentcraver;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class BaseRequest {
 
     @JsonProperty("link")
@@ -9,11 +13,6 @@ public class BaseRequest {
 
     @JsonProperty("topic")
     private String topic;
-
-    public BaseRequest(String link, String topic) {
-        this.link = link;
-        this.topic = topic;
-    }
 
     @Override
     public String toString() {
