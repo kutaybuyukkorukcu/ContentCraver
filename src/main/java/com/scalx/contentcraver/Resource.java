@@ -34,6 +34,13 @@ public class Resource {
     @Inject
     Context context;
 
+    @GET
+    @Path("/hello")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String hello() {
+        return "hello";
+    }
+
     @POST
     @Path("/articles")
     public Response getArticles(@QueryParam("content") String content, BaseRequest request)
