@@ -21,6 +21,9 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
     public Response toResponse(WebApplicationException exception) {
 
         if (exception.getClass().toString().equals(ThrowableNotAuthorizedException.class.toString())) {
+
+            LOG.error(exception.getMessage());
+
             return Response
                     .status(Response.Status.fromStatusCode(401))
                     .entity(exception.getMessage())
@@ -28,6 +31,9 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
         }
 
         if (exception.getClass().toString().equals(NotFoundException.class.toString())) {
+
+            LOG.error(exception.getMessage());
+
             return Response
                     .status(Response.Status.fromStatusCode(404))
                     .entity(exception.getMessage())
@@ -35,6 +41,9 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
         }
 
         if (exception.getClass().toString().equals(ThrowableRedirectionException.class.toString())) {
+
+            LOG.error(exception.getMessage());
+
             return Response
                     .status(Response.Status.fromStatusCode(302))
                     .entity(exception.getMessage())
@@ -43,11 +52,15 @@ public class GlobalExceptionHandler implements ExceptionMapper<WebApplicationExc
 
         if (exception.getClass().toString().equals(UnexpectedValueException.class.toString())) {
 
+            LOG.error(exception.getMessage());
+
             return Response
                     .status(Response.Status.fromStatusCode(400))
                     .entity(exception.getMessage())
                     .build();
         }
+
+        LOG.error(exception.getMessage());
 
         return Response
                 .status(Response.Status.fromStatusCode(422))
