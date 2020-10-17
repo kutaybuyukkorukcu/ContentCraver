@@ -42,7 +42,7 @@ public class Resource {
     }
 
     @POST
-    @Path("/articles")
+    @Path("/stories")
     public Response getArticles(@QueryParam("content") String content, BaseRequest request)
             throws IOException {
 
@@ -54,7 +54,7 @@ public class Resource {
             context.setCrawlerStrategy(new HNCrawler());
         }
 
-        List<BaseCard> articles =  context.getArticleLinks(request.getTopic());
+        List<BaseStory> articles =  context.getArticleLinks(request.getTopic());
 
         return Response.ok(
                 new StandardResponse(

@@ -3,16 +3,14 @@ package com.scalx.contentcraver;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
 
 public class BaseComment {
 
-    @JsonProperty("article_id")
-    private String articleId;
+    @JsonProperty("id")
+    private String id;
 
-    @JsonProperty("comment_id")
-    private String commentId;
+    @JsonProperty("story_id")
+    private String storyId;
 
     @JsonProperty("text")
     private String text;
@@ -26,9 +24,9 @@ public class BaseComment {
     @JsonProperty("created")
     private int created;
 
-    public BaseComment(String articleId, String commentId, String text, String user, String parentCommentId, int created) {
-        this.articleId = articleId;
-        this.commentId = commentId;
+    public BaseComment(String storyId, String commentId, String text, String user, String parentCommentId, int created) {
+        this.storyId = storyId;
+        this.id = id;
         this.text = text;
         this.user = user;
         this.parentCommentId = parentCommentId;
@@ -38,7 +36,7 @@ public class BaseComment {
     @Override
     public String toString() {
         return "BaseComment{" +
-                "commentId=" + commentId +
+                "id=" + id +
                 ", text='" + text + '\'' +
                 ", user='" + user + '\'' +
                 ", parentCommentId=" + parentCommentId + '\'' +
@@ -46,12 +44,12 @@ public class BaseComment {
                 '}';
     }
 
-    public String getCommentId() {
-        return commentId;
+    public String getId() {
+        return id;
     }
 
-    public void setCommentId(String commentId) {
-        this.commentId = commentId;
+    public void setId(String commentId) {
+        this.id = commentId;
     }
 
     public String getText() {

@@ -36,7 +36,7 @@ public class RDTCrawlerTest {
     ObjectMapper objectMapper;
 
     @Test
-    public void test_getArticleLinksEndpoint_throwsRedirectionException() throws Exception {
+    public void test_getStoryLinksEndpoint_throwsRedirectionException() throws Exception {
 
         BaseRequest request = new BaseRequest(null, "mockdata");
 
@@ -47,7 +47,7 @@ public class RDTCrawlerTest {
                 .contentType(ContentType.JSON)
                 .body(json)
                 .queryParam("content", "reddit")
-                .post("/api/articles")
+                .post("/api/stories")
             .then()
                 .statusCode(302)
                 .and()
@@ -55,7 +55,7 @@ public class RDTCrawlerTest {
     }
 
     @Test
-    public void test_getArticleLinksEndpoint_throwsNotFoundException() throws Exception {
+    public void test_getStoryLinksEndpoint_throwsNotFoundException() throws Exception {
 
         BaseRequest request = new BaseRequest(null, "%22%22");
 
@@ -66,7 +66,7 @@ public class RDTCrawlerTest {
                 .contentType(ContentType.JSON)
                 .body(json)
                 .queryParam("content", "reddit")
-                .post("/api/articles")
+                .post("/api/stories")
             .then()
                 .statusCode(404)
                 .and()
@@ -74,7 +74,7 @@ public class RDTCrawlerTest {
     }
 
     @Test
-    public void test_getArticleLinksEndpoint() throws Exception {
+    public void test_getStoryLinksEndpoint() throws Exception {
 
         RestAssured.defaultParser = Parser.JSON;
 
@@ -87,7 +87,7 @@ public class RDTCrawlerTest {
                     .contentType(ContentType.JSON)
                     .body(json)
                     .queryParam("content", "reddit")
-                    .post("/api/articles")
+                    .post("/api/stories")
                 .thenReturn();
 
         assertThat(response.jsonPath().getInt("statusCode")).isEqualTo(200);
@@ -97,7 +97,7 @@ public class RDTCrawlerTest {
         JsonNode jsonNode = objectMapper.convertValue(list.get(0), JsonNode.class);
 
 //        assertThat(list.size()).isEqualTo(25);
-        assertThat(jsonNode.get("article_id")).isInstanceOf(TextNode.class);
+        assertThat(jsonNode.get("id")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("title")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("main_topic")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("url")).isInstanceOf(TextNode.class);
@@ -109,7 +109,7 @@ public class RDTCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint_throwsRedirectionException() throws Exception {
+    public void test_getStoryCommentsEndpoint_throwsRedirectionException() throws Exception {
 
         BaseRequest request = new BaseRequest("javacomments/j2l1l7/7_years_of_blogging_about_java/", null);
 
@@ -128,7 +128,7 @@ public class RDTCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint_throwsNotFoundException() throws Exception {
+    public void test_getStoryCommentsEndpoint_throwsNotFoundException() throws Exception {
 
         BaseRequest request = new BaseRequest("java/comments/j2l/7_years_of_blogging_about_java/", null);
 
@@ -147,7 +147,7 @@ public class RDTCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint() throws Exception {
+    public void test_getStoryCommentsEndpoint() throws Exception {
 
         RestAssured.defaultParser = Parser.JSON;
 
@@ -167,10 +167,11 @@ public class RDTCrawlerTest {
         assertThat(response.jsonPath().getString("message")).isEqualTo("OK");
 
         List<LinkedHashMap> list = response.jsonPath().getList("data");
-        JsonNode jsonNode = objectMapper.convertValue(list.get(0), JsonNode.class);
 
-        assertThat(jsonNode.get("article_id")).isInstanceOf(TextNode.class);
-        assertThat(jsonNode.get("comment_id")).isInstanceOf(TextNode.class);
+        JsonNode jsonNode = objectMapper.convertValue(list.get(6), JsonNode.class);
+
+        assertThat(jsonNode.get("id")).isInstanceOf(TextNode.class);
+        assertThat(jsonNode.get("story_id")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("text")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("user")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("parent_comment_id")).isInstanceOf(TextNode.class);

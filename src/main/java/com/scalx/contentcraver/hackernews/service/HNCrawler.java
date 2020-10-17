@@ -3,27 +3,22 @@ package com.scalx.contentcraver.hackernews.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.scalx.contentcraver.BaseCard;
+import com.scalx.contentcraver.BaseStory;
 import com.scalx.contentcraver.BaseComment;
 
 import com.scalx.contentcraver.Crawler;
 import com.scalx.contentcraver.exception.ThrowableNotAuthorizedException;
-import com.scalx.contentcraver.exception.ThrowableRedirectionException;
 import com.scalx.contentcraver.exception.UnexpectedValueException;
-import com.scalx.contentcraver.hackernews.entity.HNCard;
+import com.scalx.contentcraver.hackernews.entity.HNStory;
 import com.scalx.contentcraver.hackernews.entity.HNComment;
 import com.scalx.contentcraver.helper.CrawlerStrategy;
-import com.scalx.contentcraver.reddit.entity.RDTCard;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +32,12 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
     private static int sizeOfComments = 0;
 
-    private static String articleId = "";
+    private static String storyId = "";
 
     private static final Logger LOG = Logger.getLogger(HNCrawler.class);
 
     @Override
-    public List<BaseCard> getArticleLinks(String articleTopic) throws IOException {
+    public List<BaseStory> getStoryLinks(String articleTopic) throws IOException {
 
         String jsonString = "";
 
@@ -64,14 +59,14 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
-        List<Integer> articleIdList = objectMapper.convertValue(
+        List<Integer> storyIdList = objectMapper.convertValue(
                 jsonNode,
                 TypeFactory.defaultInstance().constructCollectionType(List.class, Integer.class)
         );
 
-        List<BaseCard> articleList = new ArrayList<>();
+        List<BaseStory> articleList = new ArrayList<>();
 
-        for (Integer itemNumber : articleIdList.stream().limit(25).collect(Collectors.toList())) {
+        for (Integer itemNumber : storyIdList.stream().limit(25).collect(Collectors.toList())) {
 
             String articleString = "";
 
@@ -121,7 +116,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
                 url = articleNode.get("url").asText();
             }
 
-            articleList.add(new HNCard(
+            articleList.add(new HNStory(
                     articleNode.get("id").asText(),
                     articleNode.get("title").asText(),
                     "Development",
@@ -138,7 +133,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
     }
 
     @Override
-    public List<BaseComment> getArticleComments(String articleLink) throws JsonProcessingException {
+    public List<BaseComment> getStoryComments(String articleLink) throws JsonProcessingException {
 
         String jsonString = "";
 
@@ -174,7 +169,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         sizeOfComments = getCommentCount(jsonNode);
 
-        articleId = getArticleId(jsonNode);
+        storyId = getStoryId(jsonNode);
 
         List<Integer> kidCommentList = objectMapper.convertValue(
                 jsonNode.get("kids"),
@@ -185,7 +180,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
 
         sizeOfComments = 0;
 
-        articleId = "";
+        storyId = "";
 
         return comments;
     }
@@ -234,8 +229,8 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
             if (isKidCommentAvailable) {
 
                 comments.add(new HNComment(
-                        articleId,
                         commentNode.get("id").asText(),
+                        storyId,
                         commentNode.get("text").asText(),
                         commentNode.get("by").asText(),
                         commentNode.get("parent").asText(),
@@ -246,8 +241,8 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
             }
 
             comments.add(new HNComment(
-                    articleId,
                     commentNode.get("id").asText(),
+                    storyId,
                     commentNode.get("text").asText(),
                     commentNode.get("by").asText(),
                     commentNode.get("parent").asText(),
@@ -271,7 +266,7 @@ public class HNCrawler extends Crawler implements CrawlerStrategy {
         return Integer.parseInt(jsonNode.get("descendants").asText());
     }
 
-    private String getArticleId(JsonNode jsonNode) {
+    private String getStoryId(JsonNode jsonNode) {
         return jsonNode.get("id").asText();
     }
 }

@@ -1,6 +1,6 @@
 package com.scalx.contentcraver.helper;
 
-import com.scalx.contentcraver.BaseCard;
+import com.scalx.contentcraver.BaseStory;
 import com.scalx.contentcraver.BaseComment;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -18,11 +18,11 @@ public class Context {
         this.crawlerStrategy = crawlerStrategy;
     }
 
-    public List<BaseCard> getArticleLinks(String subreddit) throws IOException {
-        return crawlerStrategy.getArticleLinks(subreddit);
+    public List<BaseStory> getArticleLinks(String subreddit) throws IOException {
+        return crawlerStrategy.getStoryLinks(subreddit);
     }
 
     public List<BaseComment> getArticleComments(String articleLink) throws IOException {
-        return crawlerStrategy.getArticleComments(articleLink);
+        return crawlerStrategy.getStoryComments(articleLink);
     }
 }

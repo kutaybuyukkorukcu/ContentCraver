@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.scalx.contentcraver.BaseStory;
 import com.scalx.contentcraver.Crawler;
 import com.scalx.contentcraver.exception.ThrowableRedirectionException;
-import com.scalx.contentcraver.hackernews.entity.HNComment;
-import com.scalx.contentcraver.reddit.entity.RDTCard;
+import com.scalx.contentcraver.reddit.entity.RDTStory;
 import com.scalx.contentcraver.helper.CrawlerStrategy;
-import com.scalx.contentcraver.BaseCard;
 import com.scalx.contentcraver.BaseComment;
 import com.scalx.contentcraver.reddit.entity.RDTComment;
 import org.jboss.logging.Logger;
@@ -30,13 +29,13 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
     private static int sizeOfComments = 0;
 
-    private static String articleId = "";
+    private static String storyId = "";
 
     private static final Logger LOG = Logger.getLogger(RDTCrawler.class);
 
     // Main page of an subreddit
     @Override
-    public List<BaseCard> getArticleLinks(String articleTopic) throws IOException {
+    public List<BaseStory> getStoryLinks(String articleTopic) throws IOException {
 
         String jsonString = "";
 
@@ -65,13 +64,13 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
                 TypeFactory.defaultInstance().constructCollectionType(List.class, LinkedHashMap.class)
         );
 
-        List<BaseCard> rdtCardList = new ArrayList<>();
+        List<BaseStory> rdtCardList = new ArrayList<>();
 
         for (LinkedHashMap<String, LinkedHashMap> linkedHashMap : childrenList) {
 
             LinkedHashMap<String, Object> articleMap = linkedHashMap.get("data");
 
-            rdtCardList.add(new RDTCard(
+            rdtCardList.add(new RDTStory(
                     articleMap.get("name").toString(),
                     articleMap.get("title").toString(),
                     articleMap.get("subreddit").toString(),
@@ -88,7 +87,7 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
     }
 
     @Override
-    public List<BaseComment> getArticleComments(String articleLink) throws IOException {
+    public List<BaseComment> getStoryComments(String articleLink) throws IOException {
 
         // Processing exception might be throwwn cause of the articleLink.
         // It's probably best to create pattern for articleLink (regx)
@@ -117,7 +116,7 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         sizeOfComments = getCommentCount(articleNode);
 
-        articleId = getArticleId(articleNode);
+        storyId = getStoryId(articleNode);
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
@@ -132,7 +131,7 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         sizeOfComments = 0;
 
-        articleId = "";
+        storyId = "";
 
         return comments;
     }
@@ -152,8 +151,8 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
             if (commentMap.get("replies").equals("")) {
 
                 comments.add(new RDTComment(
-                        articleId,
-                        commentMap.get("name").toString(),
+                        commentMap.get("id").toString(),
+                        storyId,
                         commentMap.get("body").toString(),
                         commentMap.get("author").toString(),
                         commentMap.get("parent_id").toString(),
@@ -164,8 +163,8 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
             }
 
             comments.add(new RDTComment(
-                    articleId,
-                    commentMap.get("name").toString(),
+                    commentMap.get("id").toString(),
+                    storyId,
                     commentMap.get("body").toString(),
                     commentMap.get("author").toString(),
                     commentMap.get("parent_id").toString(),
@@ -194,8 +193,6 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
-        LOG.info(jsonNode.get(0).toPrettyString());
-
         List<LinkedHashMap<String, LinkedHashMap>> childrenList = objectMapper.convertValue(
                 jsonNode.get(0).get("data").get("children"),
                 TypeFactory.defaultInstance().constructCollectionType(List.class, LinkedHashMap.class)
@@ -208,7 +205,7 @@ public class RDTCrawler extends Crawler implements CrawlerStrategy {
         return Integer.parseInt(articleNode.get("num_comments").toString());
     }
 
-    private String getArticleId(LinkedHashMap articleNode) {
-        return articleNode.get("name").toString();
+    private String getStoryId(LinkedHashMap articleNode) {
+        return articleNode.get("id").toString();
     }
 }

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class BaseCard {
+public class BaseStory {
 
-    @JsonProperty("article_id")
-    String articleId;
+    @JsonProperty("id")
+    String id;
 
     @JsonProperty("title")
     String title;
@@ -33,12 +33,9 @@ public class BaseCard {
     @JsonProperty("created")
     int created;
 
-    @JsonProperty("comments")
-    List<BaseComment> comments;
-
-    public BaseCard(String articleId, String title, String mainTopic, String url, String author, String text,
-                    int upvoteCount, int commentCount, int created) {
-        this.articleId = articleId;
+    public BaseStory(String id, String title, String mainTopic, String url, String author, String text,
+                     int upvoteCount, int commentCount, int created) {
+        this.id = id;
         this.title = title;
         this.mainTopic = mainTopic;
         this.url = url;
@@ -51,8 +48,8 @@ public class BaseCard {
 
     @Override
     public String toString() {
-        return "BaseCard{" +
-                "articleId='" + articleId + '\'' +
+        return "BaseStory{" +
+                "id='" + id + '\'' +
                 ", title='" + title + '\'' +
                 ", mainTopic='" + mainTopic + '\'' +
                 ", url='" + url + '\'' +
@@ -64,12 +61,12 @@ public class BaseCard {
                 '}';
     }
 
-    public String getArticleId() {
-        return articleId;
+    public String getId() {
+        return id;
     }
 
-    public void setArticleId(String articleId) {
-        this.articleId = articleId;
+    public void setId(String articleId) {
+        this.id = id;
     }
 
     public int getCreated() {

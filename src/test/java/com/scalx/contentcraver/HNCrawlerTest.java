@@ -28,7 +28,7 @@ public class HNCrawlerTest {
     ObjectMapper objectMapper;
 
     @Test
-    public void test_getArticleLinksEndpoint_throwsNotAuthorizedException() throws Exception {
+    public void test_getStoryLinksEndpoint_throwsNotAuthorizedException() throws Exception {
 
         BaseRequest request = new BaseRequest(null, "mockdata");
 
@@ -39,7 +39,7 @@ public class HNCrawlerTest {
                 .contentType(ContentType.JSON)
                 .body(json)
                 .queryParam("content", "hackernews")
-                .post("/api/articles")
+                .post("/api/stories")
             .then()
                 .statusCode(401)
                 .and()
@@ -47,7 +47,7 @@ public class HNCrawlerTest {
     }
 
     @Test
-    public void test_getArticleLinksEndpoint() throws Exception {
+    public void test_getStoryLinksEndpoint() throws Exception {
 
         RestAssured.defaultParser = Parser.JSON;
 
@@ -60,7 +60,7 @@ public class HNCrawlerTest {
                     .contentType(ContentType.JSON)
                     .body(json)
                     .queryParam("content", "hackernews")
-                    .post("/api/articles")
+                    .post("/api/stories")
                 .thenReturn();
 
         assertThat(response.jsonPath().getInt("statusCode")).isEqualTo(200);
@@ -70,7 +70,7 @@ public class HNCrawlerTest {
         JsonNode jsonNode = objectMapper.convertValue(list.get(0), JsonNode.class);
 
 //        assertThat(list.size()).isEqualTo(24);
-        assertThat(jsonNode.get("article_id")).isInstanceOf(TextNode.class);
+        assertThat(jsonNode.get("id")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("title")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("main_topic")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("url")).isInstanceOf(TextNode.class);
@@ -82,7 +82,7 @@ public class HNCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint_throwsUnexpectedValueException_1() throws Exception {
+    public void test_getStoryCommentsEndpoint_throwsUnexpectedValueException_1() throws Exception {
 
         BaseRequest request = new BaseRequest("top",null);
 
@@ -101,7 +101,7 @@ public class HNCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint_throwsUnexpectedValueException_2() throws Exception {
+    public void test_getStoryCommentsEndpoint_throwsUnexpectedValueException_2() throws Exception {
 
         BaseRequest request = new BaseRequest("24576346", null);
 
@@ -120,7 +120,7 @@ public class HNCrawlerTest {
     }
 
     @Test
-    public void test_getArticleCommentsEndpoint() throws Exception {
+    public void test_getStoryCommentsEndpoint() throws Exception {
 
         RestAssured.defaultParser = Parser.JSON;
 
@@ -142,8 +142,8 @@ public class HNCrawlerTest {
         List<LinkedHashMap> list = response.jsonPath().getList("data");
         JsonNode jsonNode = objectMapper.convertValue(list.get(0), JsonNode.class);
 
-        assertThat(jsonNode.get("article_id")).isInstanceOf(TextNode.class);
-        assertThat(jsonNode.get("comment_id")).isInstanceOf(TextNode.class);
+        assertThat(jsonNode.get("id")).isInstanceOf(TextNode.class);
+        assertThat(jsonNode.get("story_id")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("text")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("user")).isInstanceOf(TextNode.class);
         assertThat(jsonNode.get("parent_comment_id")).isInstanceOf(TextNode.class);
